@@ -12,7 +12,7 @@ def read_json_lines_from_url(url):
         lines = response.read().decode("utf-8").splitlines()
         return [json.loads(line) for line in lines]
 
-st.title("main title")
+st.title("タイトル")
 with st.sidebar:
     st.title("sidebar title")
     st.button("hello")
@@ -59,21 +59,21 @@ def angle_to_arrow(angle):
     try:
         angle = int(float(angle))
         if 337 <= angle or angle < 22:
-            return "⬆️ N"
+            return "↓ N"
         elif 22 <= angle < 67:
-            return "↗️ NE"
+            return "↙️ NE"
         elif 67 <= angle < 112:
-            return "→ E"
+            return "← E"
         elif 112 <= angle < 157:
-            return "↘️ SE"
+            return "↖️ SE"
         elif 157 <= angle < 202:
-            return "↓ S"
+            return "⬆️ S"
         elif 202 <= angle < 247:
-            return "↙️ SW"
+            return "↗️ SW"
         elif 247 <= angle < 292:
-            return "← W"
+            return "→ W"
         elif 292 <= angle < 337:
-            return "↖️ NW"
+            return "↘️ NW"
         else:
             return "❓"
     except (ValueError, TypeError):
@@ -83,7 +83,7 @@ def angle_to_arrow(angle):
 df["wind direction"] = df["windangle"].apply(angle_to_arrow)
 
 # 表示
-st.subheader("🍃 風の向き（絵文字表示）")
+st.subheader("🍃 風の向き")
 st.dataframe(df[["windangle", "wind direction"]])
 
 st.subheader("☀️ 照度の推移")
