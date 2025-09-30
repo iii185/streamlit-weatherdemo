@@ -1,3 +1,4 @@
+#python -m streamlit run app.pyで強制的に実行
 import streamlit as st
 import pandas as pd
 import urllib.request
@@ -5,18 +6,125 @@ import json
 import pydeck as pdk
 import numpy as np
 
-# # GitHub上のJSONファイルのURL（1行1レコードの形式）
-JSON_FILE_URL = "https://raw.githubusercontent.com/iii185/Jsonurl1/main/data.json"
-#
-# JSON Lines（1行ずつJSON）の読み込み関数
-def read_json_lines_from_url(url):
-    with urllib.request.urlopen(url) as response:
-        lines = response.read().decode("utf-8").splitlines()
-        return [json.loads(line) for line in lines]
+
+
+# # 📍 大きなタイトル（HTMLでフォントサイズ調整）
+# st.markdown(
+#     """
+#     <h1 style="
+#         text-align: left; 
+#         font-size: 60px; 
+#         font-family: 'Oswald', 'Noto Sans JP', sans-serif;
+#         white-space: normal;
+#         word-wrap: break-word;
+#         margin-left: 0;
+#         width: 100%;
+#         max-width: 800px;
+#     ">
+#         🌦️ IOTウェザーステーションApp
+#     </h1>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+st.markdown(
+    """
+    <style>
+    # /* ① ページ全体の上にしっかり余白を確保 */
+.stApp, section.main, section.main > div.block-container {
+  padding-top: 56px !important;   /* ←必要なら 72px などに増やす */
+#   overflow: visible !important;   /* 切れ防止 */
+    /* 全体コンテナの基本設定（中央揃え・横スクロール防止） */
+    .block-container {
+        text-align: center;
+        # max-width: 1000px;     /* 横幅制限（必要に応じて調整） */
+        margin: 0 auto;
+        padding: 0 20px;
+        word-wrap: break-word;
+    }
+
+    /* タイトル専用スタイル */
+    .main-title {
+        font-size: 60px;                         /* 文字サイズ */
+        font-family: 'Oswald', 'Noto Sans JP', sans-serif;
+        text-align: center;                      /* 中央寄せ */
+        white-space: normal;                     /* 改行OK */
+        word-wrap: break-word;                   /* 長い語を折り返し */
+        margin: 20px auto 40px auto;            /* 上下の余白 */
+        display: block;
+        width: 100%;
+        max-width: 900px;                       /* ここでも横幅制限 */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# st.markdown("""
+# <style>
+# /* ① ページ全体の上にしっかり余白を確保 */
+# .stApp, section.main, section.main > div.block-container {
+#   padding-top: 56px !important;   /* ←必要なら 72px などに増やす */
+#   overflow: visible !important;   /* 切れ防止 */
+# }
+
+# /* ② タイトルのデフォルト上マージンで食い込まないように */
+# h1.main-title {
+#   margin-top: 0 !important;       /* 食い込み防止 */
+#   padding-top: 8px;               /* 見出し自身にも少し余白 */
+#   line-height: 1.15;              /* つぶれ防止 */
+#   white-space: normal;            /* はみ出し防止 */
+#   word-wrap: break-word;
+#   text-align: center;
+#   font-size: clamp(40px, 6vw, 64px);
+# }
+
+# /* ③ ヘッダーを触っている場合の保険（非表示にしていても高さ調整） */
+# header[data-testid="stHeader"] {
+#   max-height: 0; 
+#   height: 0; 
+#   visibility: hidden;
+#   overflow: visible !important;
+# }
+# </style>
+# """, unsafe_allow_html=True)
+
+# タイトルを呼び出す
+st.markdown("<h1 class='main-title'>🌦️ IOTウェザーステーションApp</h1>", unsafe_allow_html=True)
+
+# CSVファイルのURL（GitHub上のCSVをRaw形式で指定）
+CSV_FILE_URL = "https://raw.githubusercontent.com/iii185/csv.demo1/refs/heads/main/0919(in).csv"
+# -----------------------------
+# 📥 CSVの読み込み
+# -----------------------------
+@st.cache_data
+def read_csv_from_url(url):
+    return pd.read_csv(url)
+
+# データ読み込み
+df = read_csv_from_url(CSV_FILE_URL)
+
+# -----------------------------
+# 📤 CSVファイルアップロード欄
+# -----------------------------
+uploaded_file = st.file_uploader(
+    "CSVファイルをアップロードしてください（任意）", 
+    type="csv"
+)
+
+# -----------------------------
+# 📥 データ読み込み
+# -----------------------------
+if uploaded_file is not None:
+    st.success("✅ アップロードしたCSVを読み込みました！")
+    df = pd.read_csv(uploaded_file)  # ← アップロードしたCSVを読み込む
+else:
+    st.info("ℹ️ CSVがアップロードされていないため、デモ版CSVを使用します。")
+    df = pd.read_csv(CSV_FILE_URL)   # ← GitHubのCSVを読み込む
 
 # def read_csv_from_url(url):
+# st.title("IOTウェザーステーションApp")
 
-    st.title("main title")
 with st.sidebar:
     st.title("sidebar title")
     st.button("hello")
@@ -24,10 +132,16 @@ with st.sidebar:
     st.divider()
     st.radio("year",["2025","2026","2027"])
 
-# データ読み込み
-data = read_json_lines_from_url(JSON_FILE_URL)  # () と URL を忘れずに
-# データを DataFrame に変換
-df = pd.DataFrame(data)
+# # データ読み込み
+# data = read_json_lines_from_url(JSON_FILE_URL)  # () と URL を忘れずに
+# # データを DataFrame に変換
+# df = pd.DataFrame(data)
+
+# 📥 データ読み込み（CSVの場合）
+df = pd.read_csv(CSV_FILE_URL)  # ← これだけでOK！
+
+# ✅ データ確認（任意）
+st.write("📊 読み込んだデータ：", df.head())
 
 
 # データカラム名を小文字に統一
@@ -39,7 +153,7 @@ df.columns = [col.lower() for col in df.columns]
 st.subheader("🗺️ マップ（崇城大学内）")
 
 # 崇城大学池田キャンパス中心（崇城大座標）
-KUMAMOTO_LAT = 32.831
+KUMAMOTO_LAT = 32.83074
 KUMAMOTO_LON = 130.6964611
 #  32.8304495
 # もしデータ側に lat/lon があればそれを使う。無ければ熊本周辺にランダム生成
@@ -203,3 +317,9 @@ if "date" in df.columns:
         st.error(f"⚠️ 日付処理中にエラーが発生しました: {str(e)}")
         import traceback
         st.code(traceback.format_exc())
+
+# -----------------------------
+# 📊 表示
+# -----------------------------
+st.subheader("📈 全計測データ")
+st.dataframe(df)
